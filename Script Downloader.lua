@@ -300,6 +300,21 @@ local DownloadCorner = Instance.new("UICorner")
 DownloadCorner.CornerRadius = UDim.new(0, 8)
 DownloadCorner.Parent = Download
 
+local Stop = Instance.new("TextButton")
+Stop.Size = UDim2.new(0, 28, 0, 48)
+Stop.Position = UDim2.new(1, -14, 0, 221)
+Stop.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
+Stop.Text = "■"
+Stop.Font = Enum.Font.GothamBold
+Stop.TextSize = 16
+Stop.TextColor3 = Color3.fromRGB(14, 16, 21)
+Stop.Visible = false
+Stop.Parent = Body
+
+local StopCorner = Instance.new("UICorner")
+StopCorner.CornerRadius = UDim.new(0, 8)
+StopCorner.Parent = Stop
+
 local SelectedTypes = {
 	LocalScript = true,
 	ModuleScript = true
@@ -313,6 +328,7 @@ local SelectedDirectories = {
 
 local Minimized = false
 local Downloading = false
+local Stopped = false
 
 LocalScript.MouseButton1Click:Connect(function()
 	SelectedTypes.LocalScript = not SelectedTypes.LocalScript
@@ -363,13 +379,29 @@ Close.MouseButton1Click:Connect(function()
 	ScreenGui:Destroy()
 end)
 
+Stop.MouseButton1Click:Connect(function()
+	Stopped = true
+	Stop.Visible = false
+	Download.Size = UDim2.new(1, -28, 0, 48)
+	Download.BackgroundColor3 = Color3.fromRGB(99, 220, 139)
+	Download.Text = "Download Scripts"
+	Downloading = false
+	Status.Text = "Stopped"
+	Status.TextColor3 = Color3.fromRGB(255, 200, 80)
+	StatusIcon.Text = "O"
+	StatusIcon.TextColor3 = Color3.fromRGB(255, 200, 80)
+end)
+
 Download.MouseButton1Click:Connect(function()
 	if Downloading then
 		return
 	end
 	Downloading = true
+	Stopped = false
 	Download.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
 	Download.Text = "Collecting..."
+	Download.Size = UDim2.new(1, -44, 0, 48)
+	Stop.Visible = true
 	Status.Text = "Scanning..."
 	Status.TextColor3 = Color3.fromRGB(235, 240, 255)
 	StatusIcon.Text = "O"
@@ -389,10 +421,24 @@ Download.MouseButton1Click:Connect(function()
 	end
 	for _, Root in ipairs(Roots) do
 		for _, Descendant in ipairs(Root:GetDescendants()) do
+			if Stopped then
+				break
+			end
 			if (SelectedTypes.LocalScript and Descendant:IsA("LocalScript")) or (SelectedTypes.ModuleScript and Descendant:IsA("ModuleScript")) then
 				Scripts[#Scripts + 1] = Descendant
 			end
 		end
+		if Stopped then
+			break
+		end
+	end
+	if Stopped then
+		Download.BackgroundColor3 = Color3.fromRGB(99, 220, 139)
+		Download.Text = "Download Scripts"
+		Download.Size = UDim2.new(1, -28, 0, 48)
+		Stop.Visible = false
+		Downloading = false
+		return
 	end
 	if #Scripts == 0 then
 		Status.Text = "No scripts found"
@@ -401,12 +447,17 @@ Download.MouseButton1Click:Connect(function()
 		StatusIcon.TextColor3 = Color3.fromRGB(255, 90, 90)
 		Download.BackgroundColor3 = Color3.fromRGB(99, 220, 139)
 		Download.Text = "Download Scripts"
+		Download.Size = UDim2.new(1, -28, 0, 48)
+		Stop.Visible = false
 		Downloading = false
 		return
 	end
 	local Chunks = {}
 	local Failed = 0
 	for Index, Object in ipairs(Scripts) do
+		if Stopped then
+			break
+		end
 		Progress.Size = UDim2.new(Index / #Scripts, 0, 1, 0)
 		Status.Text = ("[%d/%d] %s"):format(Index, #Scripts, #Object.Name > 32 and Object.Name:sub(1, 29) .. "..." or Object.Name)
 		local Success, Source = pcall(function()
@@ -418,6 +469,14 @@ Download.MouseButton1Click:Connect(function()
 			Failed = Failed + 1
 		end
 		task.wait()
+	end
+	if Stopped then
+		Download.BackgroundColor3 = Color3.fromRGB(99, 220, 139)
+		Download.Text = "Download Scripts"
+		Download.Size = UDim2.new(1, -28, 0, 48)
+		Stop.Visible = false
+		Downloading = false
+		return
 	end
 	Progress.Size = UDim2.new(1, 0, 1, 0)
 	if #Chunks > 0 then
@@ -443,5 +502,7 @@ Download.MouseButton1Click:Connect(function()
 	end)
 	Download.BackgroundColor3 = Color3.fromRGB(99, 220, 139)
 	Download.Text = "Download Scripts"
+	Download.Size = UDim2.new(1, -28, 0, 48)
+	Stop.Visible = false
 	Downloading = false
 end)
