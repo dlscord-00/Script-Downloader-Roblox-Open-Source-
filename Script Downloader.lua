@@ -4,7 +4,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "ScriptDownloader"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Parent = gethui()
 
 local Main = Instance.new("Frame")
 Main.Size = UDim2.new(0, 340, 0, 390)
@@ -301,12 +301,12 @@ DownloadCorner.CornerRadius = UDim.new(0, 8)
 DownloadCorner.Parent = Download
 
 local Stop = Instance.new("TextButton")
-Stop.Size = UDim2.new(0, 28, 0, 48)
-Stop.Position = UDim2.new(1, -14, 0, 221)
+Stop.Size = UDim2.new(1, -28, 0, 48)
+Stop.Position = UDim2.new(0, 14, 0, 221)
 Stop.BackgroundColor3 = Color3.fromRGB(255, 90, 90)
-Stop.Text = "■"
+Stop.Text = "Stop"
 Stop.Font = Enum.Font.GothamBold
-Stop.TextSize = 16
+Stop.TextSize = 14
 Stop.TextColor3 = Color3.fromRGB(14, 16, 21)
 Stop.Visible = false
 Stop.Parent = Body
@@ -382,10 +382,11 @@ end)
 Stop.MouseButton1Click:Connect(function()
 	Stopped = true
 	Stop.Visible = false
-	Download.Size = UDim2.new(1, -28, 0, 48)
+	Download.Visible = true
 	Download.BackgroundColor3 = Color3.fromRGB(99, 220, 139)
 	Download.Text = "Download Scripts"
 	Downloading = false
+	Progress.Size = UDim2.new(0, 0, 1, 0)
 	Status.Text = "Stopped"
 	Status.TextColor3 = Color3.fromRGB(255, 200, 80)
 	StatusIcon.Text = "O"
@@ -398,9 +399,7 @@ Download.MouseButton1Click:Connect(function()
 	end
 	Downloading = true
 	Stopped = false
-	Download.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-	Download.Text = "Collecting..."
-	Download.Size = UDim2.new(1, -44, 0, 48)
+	Download.Visible = false
 	Stop.Visible = true
 	Status.Text = "Scanning..."
 	Status.TextColor3 = Color3.fromRGB(235, 240, 255)
@@ -433,11 +432,10 @@ Download.MouseButton1Click:Connect(function()
 		end
 	end
 	if Stopped then
-		Download.BackgroundColor3 = Color3.fromRGB(99, 220, 139)
-		Download.Text = "Download Scripts"
-		Download.Size = UDim2.new(1, -28, 0, 48)
+		Download.Visible = true
 		Stop.Visible = false
 		Downloading = false
+		Progress.Size = UDim2.new(0, 0, 1, 0)
 		return
 	end
 	if #Scripts == 0 then
@@ -445,11 +443,10 @@ Download.MouseButton1Click:Connect(function()
 		Status.TextColor3 = Color3.fromRGB(255, 90, 90)
 		StatusIcon.Text = "X"
 		StatusIcon.TextColor3 = Color3.fromRGB(255, 90, 90)
-		Download.BackgroundColor3 = Color3.fromRGB(99, 220, 139)
-		Download.Text = "Download Scripts"
-		Download.Size = UDim2.new(1, -28, 0, 48)
+		Download.Visible = true
 		Stop.Visible = false
 		Downloading = false
+		Progress.Size = UDim2.new(0, 0, 1, 0)
 		return
 	end
 	local Chunks = {}
@@ -471,11 +468,10 @@ Download.MouseButton1Click:Connect(function()
 		task.wait()
 	end
 	if Stopped then
-		Download.BackgroundColor3 = Color3.fromRGB(99, 220, 139)
-		Download.Text = "Download Scripts"
-		Download.Size = UDim2.new(1, -28, 0, 48)
+		Download.Visible = true
 		Stop.Visible = false
 		Downloading = false
+		Progress.Size = UDim2.new(0, 0, 1, 0)
 		return
 	end
 	Progress.Size = UDim2.new(1, 0, 1, 0)
@@ -497,12 +493,8 @@ Download.MouseButton1Click:Connect(function()
 		StatusIcon.Text = "X"
 		StatusIcon.TextColor3 = Color3.fromRGB(255, 90, 90)
 	end
-	task.delay(0.8, function()
-		Progress.Size = UDim2.new(0, 0, 1, 0)
-	end)
-	Download.BackgroundColor3 = Color3.fromRGB(99, 220, 139)
-	Download.Text = "Download Scripts"
-	Download.Size = UDim2.new(1, -28, 0, 48)
+	Progress.Size = UDim2.new(0, 0, 1, 0)
+	Download.Visible = true
 	Stop.Visible = false
 	Downloading = false
 end)
