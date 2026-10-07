@@ -397,6 +397,7 @@ Download.MouseButton1Click:Connect(function()
 	if Downloading then
 		return
 	end
+
 	Downloading = true
 	Stopped = false
 	Download.Visible = false
@@ -407,8 +408,10 @@ Download.MouseButton1Click:Connect(function()
 	StatusIcon.TextColor3 = Color3.fromRGB(255, 200, 80)
 	Progress.Size = UDim2.new(0, 0, 1, 0)
 	task.wait(0.05)
+
 	local Scripts = {}
 	local Roots = {}
+
 	if SelectedDirectories.Workspace then
 		Roots[#Roots + 1] = workspace
 	end
@@ -418,6 +421,7 @@ Download.MouseButton1Click:Connect(function()
 	if SelectedDirectories.ReplicatedStorage then
 		Roots[#Roots + 1] = game:GetService("ReplicatedStorage")
 	end
+
 	for _, Root in ipairs(Roots) do
 		for _, Descendant in ipairs(Root:GetDescendants()) do
 			if Stopped then
@@ -431,6 +435,7 @@ Download.MouseButton1Click:Connect(function()
 			break
 		end
 	end
+
 	if Stopped then
 		Download.Visible = true
 		Stop.Visible = false
@@ -438,6 +443,7 @@ Download.MouseButton1Click:Connect(function()
 		Progress.Size = UDim2.new(0, 0, 1, 0)
 		return
 	end
+
 	if #Scripts == 0 then
 		Status.Text = "No scripts found"
 		Status.TextColor3 = Color3.fromRGB(255, 90, 90)
@@ -449,24 +455,45 @@ Download.MouseButton1Click:Connect(function()
 		Progress.Size = UDim2.new(0, 0, 1, 0)
 		return
 	end
+
 	local Chunks = {}
 	local Failed = 0
+
 	for Index, Object in ipairs(Scripts) do
 		if Stopped then
 			break
 		end
+
 		Progress.Size = UDim2.new(Index / #Scripts, 0, 1, 0)
 		Status.Text = ("[%d/%d] %s"):format(Index, #Scripts, #Object.Name > 32 and Object.Name:sub(1, 29) .. "..." or Object.Name)
-		local Success, Source = pcall(function()
-			return (decompile and decompile(Object)) or Object.Source
-		end)
-		if Success and type(Source) == "string" and #Source > 0 then
+
+		local Source
+
+		if decompile then
+			local ok, res = pcall(decompile, Object)
+			if ok and type(res) == "string" and #res >= 4 then
+				Source = res
+			end
+		end
+
+		if not Source then
+			local ok, src = pcall(function()
+				return Object.Source
+			end)
+			if ok and type(src) == "string" and #src > 0 then
+				Source = src
+			end
+		end
+
+		if type(Source) == "string" and #Source > 0 then
 			Chunks[#Chunks + 1] = ("-- Path: %s\n-- Class: %s\n%s\n\n"):format(Object:GetFullName(), Object.ClassName, string.rep("-", 72)) .. Source .. "\n\n"
 		else
 			Failed = Failed + 1
 		end
+
 		task.wait()
 	end
+
 	if Stopped then
 		Download.Visible = true
 		Stop.Visible = false
@@ -474,7 +501,9 @@ Download.MouseButton1Click:Connect(function()
 		Progress.Size = UDim2.new(0, 0, 1, 0)
 		return
 	end
+
 	Progress.Size = UDim2.new(1, 0, 1, 0)
+
 	if #Chunks > 0 then
 		if SelectedTypes.LocalScript and SelectedTypes.ModuleScript then
 			writefile(game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name .. ".lua", table.concat(Chunks, ""))
@@ -493,6 +522,7 @@ Download.MouseButton1Click:Connect(function()
 		StatusIcon.Text = "X"
 		StatusIcon.TextColor3 = Color3.fromRGB(255, 90, 90)
 	end
+
 	Progress.Size = UDim2.new(0, 0, 1, 0)
 	Download.Visible = true
 	Stop.Visible = false
