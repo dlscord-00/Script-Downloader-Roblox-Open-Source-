@@ -469,18 +469,16 @@ Download.MouseButton1Click:Connect(function()
 
 		local Source
 
-		if decompile then
-			local ok, res = pcall(decompile, Object)
-			if ok and type(res) == "string" and #res >= 4 then
-				Source = res
-			end
+		local ok, res = pcall(decompile, Object)
+		if ok and type(res) == "string" and res ~= "" and res ~= "-- decompilation panicked" then
+			Source = res
 		end
 
 		if not Source then
-			local ok, src = pcall(function()
+			local ok2, src = pcall(function()
 				return Object.Source
 			end)
-			if ok and type(src) == "string" and #src > 0 then
+			if ok2 and type(src) == "string" and #src > 0 then
 				Source = src
 			end
 		end
